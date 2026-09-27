@@ -13,11 +13,13 @@ export default function App() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:8000/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
+      const response = await fetch("https://fake-news-xai-app-1.onrender.com/analyze", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ text: articleText })
+});
 
       if (!response.ok) {
         throw new Error('Failed to analyze the text.');
