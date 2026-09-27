@@ -17,11 +17,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Hugging Face Model & Token Setup
 MODEL_PATH = "Samriddha03/fake-news-bert-xai"
 HF_TOKEN = os.getenv("HF_TOKEN", "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")
 
-# Initialize Hugging Face Inference Client (runs remotely on HF servers)
 client = InferenceClient(api_key=HF_TOKEN)
 
 class_names = ["Fake", "Real"]
@@ -32,8 +30,8 @@ class ArticleRequest(BaseModel):
 
 
 def predictor(texts):
-    """Predict function required by LIME.
-    Sends text perturbations to Hugging Face Inference API and returns class probabilities.
+    """Predict function for LIME.
+    Queries Hugging Face Inference API and maps raw outputs to continuous probability scores.
     """
     if isinstance(texts, str):
         texts = [texts]
@@ -42,28 +40,33 @@ def predictor(texts):
 
     for text in texts:
         try:
-            # Query Hugging Face Serverless Inference API
             results = client.text_classification(text, model=MODEL_PATH)
+            
+            # Map predictions dynamically by index or label key
+            fake_score = 0.0
+            real_score = 0.0
 
-            # Map HF output labels to probability array [Fake_prob, Real_prob]
-            prob_dict = {"LABEL_0": 0.0, "LABEL_1": 0.0, "Fake": 0.0, "Real": 0.0}
-            for item in results:
-                prob_dict[item["label"]] = item["score"]
+            for res in results:
+                label = str(res.get("label", "")).upper()
+                score = res.get("score", 0.0)
 
-            # Resolve probabilities (supports both LABEL_0/LABEL_1 and Fake/Real output tags)
-            fake_prob = prob_dict.get("LABEL_0", prob_dict.get("Fake", 0.0))
-            real_prob = prob_dict.get("LABEL_1", prob_dict.get("Real", 0.0))
+                if label in ["LABEL_0", "FAKE", "0"]:
+                    fake_score = score
+                elif label in ["LABEL_1", "REAL", "1"]:
+                    real_score = score
 
-            # Apply temperature scaling (1.5) to mirror your original setup
-            logits = np.log(np.array([fake_prob, real_prob]) + 1e-12) / 1.5
-            exp_logits = np.exp(logits - np.max(logits))
-            scaled_probs = exp_logits / np.sum(exp_logits)
+            # Normalize probabilities if sum is off
+            total = fake_score + real_score
+            if total > 0:
+                fake_score /= total
+                real_score /= total
+            else:
+                fake_score, real_score = 0.5, 0.5
 
-            all_probs.append(scaled_probs)
+            all_probs.append([fake_score, real_score])
 
         except Exception:
-            # Fallback uniform probability if API call fails for a single perturbation
-            all_probs.append(np.array([0.5, 0.5]))
+            all_probs.append([0.5, 0.5])
 
     return np.array(all_probs)
 
@@ -86,17 +89,18 @@ def analyze_article(request: ArticleRequest):
     confidence = round(float(probs[pred_class]) * 100, 2)
 
     # 2. Get LIME Explanation
-    # Keep num_samples low (e.g., 25-50) so LIME runs quickly over API calls
     exp = explainer.explain_instance(
-        request.text, predictor, num_features=8, num_samples=30
+        request.text, 
+        predictor, 
+        num_features=8, 
+        num_samples=25
     )
 
-    # Scale up LIME scores so they display cleanly on the frontend UI
     feature_weights = [
         {
             "word": word,
-            "score": round(score * 1000, 4),
-            "weight": round(score * 1000, 4),
+            "score": round(score * 100, 4),
+            "weight": round(score * 100, 4),
         }
         for word, score in exp.as_list()
     ]
