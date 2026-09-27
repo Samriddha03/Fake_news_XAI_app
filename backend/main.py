@@ -19,7 +19,7 @@ app.add_middleware(
 
 # Hugging Face Model & Token Setup
 MODEL_PATH = "Samriddha03/fake-news-bert-xai"
-HF_TOKEN = "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"
+HF_TOKEN = os.getenv("HF_TOKEN", "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")
 
 # Initialize Hugging Face Inference Client (runs remotely on HF servers)
 client = InferenceClient(api_key=HF_TOKEN)
