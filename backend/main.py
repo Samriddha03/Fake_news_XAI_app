@@ -19,7 +19,7 @@ app.add_middleware(
 MODEL_PATH = "Samriddha03/fake-news-bert-xai"
 HF_TOKEN = os.getenv("HF_TOKEN", "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")
 
-client = InferenceClient(api_key=HF_TOKEN)
+client = InferenceClient(token=HF_TOKEN)
 
 class_names = ["Fake", "Real"]
 explainer = LimeTextExplainer(class_names=class_names)
@@ -27,8 +27,10 @@ explainer = LimeTextExplainer(class_names=class_names)
 class ArticleRequest(BaseModel):
     text: str
 
+last_error = None
 
 def predictor(texts):
+    global last_error
     if isinstance(texts, str):
         texts = [texts]
 
@@ -38,7 +40,6 @@ def predictor(texts):
         try:
             results = client.text_classification(text, model=MODEL_PATH)
 
-            # Unnest response if HF returns a list inside a list: [[{...}, {...}]]
             if isinstance(results, list) and len(results) > 0 and isinstance(results[0], list):
                 results = results[0]
 
@@ -46,7 +47,6 @@ def predictor(texts):
             real_score = 0.0
 
             for res in results:
-                # Handle both object attributes and dict key access
                 label = str(getattr(res, "label", res.get("label", "") if isinstance(res, dict) else "")).upper()
                 score = float(getattr(res, "score", res.get("score", 0.0) if isinstance(res, dict) else 0.0))
 
@@ -65,6 +65,7 @@ def predictor(texts):
             all_probs.append([fake_score, real_score])
 
         except Exception as e:
+            last_error = str(e)
             all_probs.append([0.5, 0.5])
 
     return np.array(all_probs)
@@ -77,6 +78,9 @@ def home():
 
 @app.post("/analyze")
 def analyze_article(request: ArticleRequest):
+    global last_error
+    last_error = None
+
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty.")
 
@@ -107,4 +111,5 @@ def analyze_article(request: ArticleRequest):
         "prediction": label,
         "confidence": confidence,
         "explanation": feature_weights,
+        "debug_error": last_error
     }
