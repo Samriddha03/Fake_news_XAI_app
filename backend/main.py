@@ -8,7 +8,6 @@ from huggingface_hub import InferenceClient
 
 app = FastAPI(title="Fake News Detection & XAI API")
 
-# Enable CORS so your React frontend can talk to the backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -30,9 +29,6 @@ class ArticleRequest(BaseModel):
 
 
 def predictor(texts):
-    """Predict function for LIME.
-    Queries Hugging Face Inference API and maps raw outputs to continuous probability scores.
-    """
     if isinstance(texts, str):
         texts = [texts]
 
@@ -41,21 +37,24 @@ def predictor(texts):
     for text in texts:
         try:
             results = client.text_classification(text, model=MODEL_PATH)
-            
-            # Map predictions dynamically by index or label key
+
+            # Unnest response if HF returns a list inside a list: [[{...}, {...}]]
+            if isinstance(results, list) and len(results) > 0 and isinstance(results[0], list):
+                results = results[0]
+
             fake_score = 0.0
             real_score = 0.0
 
             for res in results:
-                label = str(res.get("label", "")).upper()
-                score = res.get("score", 0.0)
+                # Handle both object attributes and dict key access
+                label = str(getattr(res, "label", res.get("label", "") if isinstance(res, dict) else "")).upper()
+                score = float(getattr(res, "score", res.get("score", 0.0) if isinstance(res, dict) else 0.0))
 
                 if label in ["LABEL_0", "FAKE", "0"]:
                     fake_score = score
                 elif label in ["LABEL_1", "REAL", "1"]:
                     real_score = score
 
-            # Normalize probabilities if sum is off
             total = fake_score + real_score
             if total > 0:
                 fake_score /= total
@@ -65,7 +64,7 @@ def predictor(texts):
 
             all_probs.append([fake_score, real_score])
 
-        except Exception:
+        except Exception as e:
             all_probs.append([0.5, 0.5])
 
     return np.array(all_probs)
@@ -81,14 +80,12 @@ def analyze_article(request: ArticleRequest):
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty.")
 
-    # 1. Get Prediction & Continuous Probabilities
     probs = predictor([request.text])[0]
     pred_class = int(np.argmax(probs))
 
     label = class_names[pred_class]
     confidence = round(float(probs[pred_class]) * 100, 2)
 
-    # 2. Get LIME Explanation
     exp = explainer.explain_instance(
         request.text, 
         predictor, 
