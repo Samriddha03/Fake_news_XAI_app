@@ -35,9 +35,10 @@ fake_news_xai_app/
 │   └── dist/              # Production build output
 │
 └── README.md
-
+```
 
 ⚙️ How to Run Locally
+
 ```bash
 1. Clone the Repository
 
@@ -46,6 +47,7 @@ cd Fake_news_XAI_app
 ```
 
 2. Run the Backend Locally
+
 ```bash
 cd backend
 pip install -r requirements.txt
@@ -54,6 +56,7 @@ The FastAPI server will start at http://127.0.0.1:8000.
 ```
 
 3. Run the Frontend Locally
+
 ```bash
 Open a new terminal window, navigate to the frontend directory, install dependencies, and start the development server:
 
