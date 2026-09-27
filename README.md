@@ -36,25 +36,33 @@ fake_news_xai_app/
 │
 └── README.md
 
+
 ⚙️ How to Run Locally
+```bash
 1. Clone the Repository
 
 git clone [https://github.com/Samriddha03/Fake_news_XAI_app.git](https://github.com/Samriddha03/Fake_news_XAI_app.git)
 cd Fake_news_XAI_app
-2. Run the Backend Locally
+```
 
+2. Run the Backend Locally
+```bash
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 The FastAPI server will start at http://127.0.0.1:8000.
+```
 
 3. Run the Frontend Locally
+```bash
 Open a new terminal window, navigate to the frontend directory, install dependencies, and start the development server:
 
 
 cd frontend
 npm install
 npm run dev
+```
+
 👤 Author
 Samriddha Chakraborty — https://github.com/Samriddha03
 
@@ -62,9 +70,11 @@ Samriddha Chakraborty — https://github.com/Samriddha03
 ---
 
 ### How to push this final update to GitHub:
+```bash
 1. Replace the contents of your local `README.md` file with the code block above.
 2. Open PowerShell in your project folder (`D:\Documents\fake_news_xai_app`) and run:
    ```powershell
    git add README.md
    git commit -m "docs: include live frontend UI link in README"
    git push origin main
+   ```
