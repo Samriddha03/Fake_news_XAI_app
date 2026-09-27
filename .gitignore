@@ -1,0 +1,27 @@
+# Large model weights & binaries
+backend/model/
+*.safetensors
+*.bin
+*.h5
+*.pt
+*.onnx
+
+# Python virtual environment & cache
+backend/venv/
+backend/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Frontend dependencies & build outputs
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+
+# Local environment variables & IDE settings
+.env
+*.env
+.vscode/
+.idea/
+.DS_Store
