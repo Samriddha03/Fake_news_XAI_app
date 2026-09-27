@@ -1,71 +1,70 @@
 # Explainable Fake News Detection System (NLP & XAI)
 
-An end-to-end full-stack web application for automated fake news classification with word-level model interpretability powered by **FastAPI**, **PyTorch**, **Hugging Face Transformers**, and **LIME (Local Interpretable Model-agnostic Explanations)**.
+A full-stack machine learning application that detects fake news articles using a fine-tuned BERT model and provides transparent, word-level explanations using **LIME (Local Interpretable Model-agnostic Explanations)**.
 
 ---
 
-## 🌟 Key Features
-- **BERT Classifier:** Analyzes news text using a fine-tuned BERT sequence classification model.
-- **Explainable AI (XAI):** Computes word-level feature importance scores via LIME to highlight key terms driving the prediction.
-- **Automated Model Resolution:** Automatically fetches fine-tuned model weights directly from [Hugging Face Hub](https://huggingface.co/Samriddha03/fake-news-bert-xai) on server startup—no manual large file downloads required.
+## 🚀 Live Deployments
+
+* **Frontend Web App (Hugging Face Spaces):** [Fake News Detector UI](https://huggingface.co/spaces/Samriddha03/fake-news-backend)
+* **Backend REST API (Render):** [FastAPI Swagger Documentation](https://fake-news-xai-app-1.onrender.com/docs)
 
 ---
 
-## 🚀 Tech Stack
-- **Backend:** FastAPI, PyTorch, Transformers, LIME, Uvicorn
-- **Frontend:** React, HTML5/CSS3
-- **Model Registry:** [Hugging Face Hub (`Samriddha03/fake-news-bert-xai`)](https://huggingface.co/Samriddha03/fake-news-bert-xai)
+## 🛠️ Tech Stack
+
+* **Backend:** FastAPI, Python, Hugging Face Hub (`InferenceClient`), LIME, NumPy, Render
+* **Frontend:** React, Vite, JavaScript, HTML/CSS, Hugging Face Static Spaces
+* **Machine Learning Model:** Fine-tuned BERT binary classification (`Samriddha03/fake-news-bert-xai`)
 
 ---
 
-## 🛠️ Local Setup Instructions
+## 📂 Project Structure
 
-### Prerequisites
-- Python 3.9+
-- Node.js 16+ & npm
+```text
+fake_news_xai_app/
+│
+├── backend/
+│   ├── main.py            # FastAPI application & LIME/BERT inference pipeline
+│   ├── requirements.txt   # Python dependencies
+│   └── Render.yaml        # Render deployment configuration
+│
+├── frontend/              # React application source code
+│   ├── src/               # React components and App.jsx logic
+│   ├── package.json       # Node dependencies and build scripts
+│   └── dist/              # Production build output
+│
+└── README.md
 
----
+⚙️ How to Run Locally
+1. Clone the Repository
 
-### Step 1: Backend Setup
+git clone [https://github.com/Samriddha03/Fake_news_XAI_app.git](https://github.com/Samriddha03/Fake_news_XAI_app.git)
+cd Fake_news_XAI_app
+2. Run the Backend Locally
 
-```bash
-# Navigate to backend directory
 cd backend
-
-# Create and activate virtual environment
-python -m venv venv
-
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Start FastAPI server
 uvicorn main:app --reload --port 8000
+The FastAPI server will start at http://127.0.0.1:8000.
+
+3. Run the Frontend Locally
+Open a new terminal window, navigate to the frontend directory, install dependencies, and start the development server:
 
 
-### Step 2: Frontend Setup
-
-```bash
-# Navigate to frontend directory
 cd frontend
-
-# Install Node modules
 npm install
-
-# Start development server
 npm run dev
-# (or 'npm start' if using Create React App)
+👤 Author
+Samriddha Chakraborty — https://github.com/Samriddha03
 
-'''
-📌 Usage
-1. Open your browser and navigate to http://localhost:5173 (or http://localhost:3000).
 
-2. Paste any news headline or full article text into the input field.
+---
 
-3. Click Analyze Article.
-
-4. Review the Classification Label (Fake vs Real), Confidence Score, and LIME Word Feature Importance Graph.
+### How to push this final update to GitHub:
+1. Replace the contents of your local `README.md` file with the code block above.
+2. Open PowerShell in your project folder (`D:\Documents\fake_news_xai_app`) and run:
+   ```powershell
+   git add README.md
+   git commit -m "docs: include live frontend UI link in README"
+   git push origin main
